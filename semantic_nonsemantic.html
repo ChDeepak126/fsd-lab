@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Semantic Structure Example</title>
+    <style>
+        /* CSS for visualization purposes only */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        header, nav, main, footer, article, aside, section, div, span, figure, figcaption {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+        }
+        header, footer { background-color: #f2f2f2; }
+        nav { background-color: #e9e9e9; }
+        main { background-color: #ffffff; }
+        aside { background-color: #ffffe0; }
+        article { background-color: #e0f7fa; }
+        section { background-color: #f5f5dc; }
+        div { background-color: #dcdcdc; }
+        figure { border-color: #a0a0a0; text-align: center; }
+        figcaption { font-style: italic; }
+        .highlight-span { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section: Contains introductory content or a set of navigational links -->
+    <header>
+        <h1>Website Title</h1>
+        <p>A brief introduction to the page.</p>
+    </header>
+
+    <!-- Navigation Section: Contains links to other pages or parts of the current page -->
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content Area: The dominant content of the document -->
+    <main>
+        
+        <!-- Section: A thematic grouping of content -->
+        <section>
+            <h2>Main Content Section Title</h2>
+            <p>This section groups related information. We can use a non-semantic <span>span tag</span> within text to highlight a <span class="highlight-span">small part of text</span> without breaking the flow.</p>
+
+            <!-- Article: Independent, self-contained content -->
+            <article>
+                <h3>Article Title</h3>
+                <p>This article could stand alone, perhaps syndicated on another site. It's a complete piece of content.</p>
+                
+                <!-- Figure and Figcaption: For images, diagrams, photos, etc. -->
+                <figure>
+                    <!-- A placeholder div acting as an image for demonstration -->
+                    <div style="width: 100px; height: 100px; background-color: #007bff; margin: auto;"></div>
+                    <figcaption>Figure 1: A sample visualization.</figcaption>
+                </figure>
+                
+                <p>More article content follows the figure.</p>
+
+                <!-- A generic container div for styling or grouping purposes within the article -->
+                <div>
+                    <h4>Inside a Div</h4>
+                    <p>This div groups content for layout or styling purposes.</p>
+                </div>
+
+            </article>
+        </section>
+
+        <!-- Aside: Content related to the main content but separate from the flow (e.g., a sidebar) -->
+        <aside>
+            <h2>Related Links Sidebar</h2>
+            <p>This content is related to the surrounding main content but is a tangent or related resource.</p>
+            <ul>
+                <li>Link 1</li>
+                <li>Link 2</li>
+            </ul>
+        </aside>
+
+    </main>
+
+    <!-- Footer Section: Contains authorship information, copyright data, or contact info for its nearest ancestor sectioning content or the entire page -->
+    <footer>
+        <p>&copy; 2026 My Website</p>
+        <p>Contact information: <a href="mailto:info@example.com">info@example.com</a></p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+#curious
+{
+    background-color: rgb(130, 177, 19);
+}
+.change
+{
+   list-style-type: disc;
+   color: #F5F5F5;
+}
+h2,h3,h4
+{
+    background-color: tomato;
+    font-family: cursive;
+}
+*
+{
+    background-color:#116466;
+    
+}

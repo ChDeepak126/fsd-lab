@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Week days</title>
+</head>
+<body>
+    <p id="one"></p>
+    <p id="two"></p>
+    <p id="three"></p>
+    <p id="four"></p>
+    <p id="five"></p>
+    <p id="six"></p>
+    <p id="seven"></p>
+    <p id="default"></p>
+    <script>
+        let day=Number(prompt("Enter day number"));
+        switch(day)
+        {
+            case 1:document.getElementById("one").innerText="Monday";
+            break;
+            case 2:document.getElementById("two").innerText="Tuesday";
+            break;
+            case 3:document.getElementById("three").innerText="Wednesday";
+            break;
+            case 4:document.getElementById("four").innerText="Thursday";
+            break;
+            case 5:document.getElementById("five").innerText="Friday";
+            break;
+            case 6:document.getElementById("six").innerText="Saturday";
+            break;
+            case 7:document.getElementById("seven").innerText="Sunday";
+            break;
+            default:document.getElementById("default").innerText="Enter correct number";
+            break;
+
+        }
+    </script>
+</body>
+</html>

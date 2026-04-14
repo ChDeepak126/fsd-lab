@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MediCare Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #f0f9ff; color: #0f172a; font-size: 15px; line-height: 1.6; }
+h1,h2,h3,h4,h5 { font-family: 'Sora', sans-serif; }
+button { font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; outline: none; }
+input, select, textarea { font-family: 'DM Sans', sans-serif; }
+
+/* ── PAGE SYSTEM ── */
+.page { display: none; }
+.page.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+  padding: 12px 28px; border-radius: 100px; font-size: 14px; font-weight: 600;
+  color: #fff; z-index: 9999; opacity: 0; transition: all 0.35s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2); pointer-events: none; white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.success { background: #10b981; }
+#toast.error   { background: #ef4444; }
+#toast.info    { background: #0ea5e9; }
+
+/* ── MODAL ── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(15,23,42,0.5); backdrop-filter: blur(4px);
+  z-index: 500; align-items: center; justify-content: center;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 20px; padding: 32px; width: 92vw; max-width: 450px;
+  max-height: 90vh; overflow-y: auto; position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  animation: popIn 0.25s ease;
+}
+@keyframes popIn { from { transform: scale(0.92) translateY(16px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+.modal-x { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: #f1f5f9; font-size: 16px; display: flex; align-items: center; justify-content: center; color: #64748b; }
+.modal-x:hover { background: #e2e8f0; }
+.modal h3 { font-size: 20px; margin-bottom: 6px; }
+.modal p  { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 22px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  transition: all 0.18s; text-decoration: none; white-space: nowrap; border: none;
+}
+.btn-primary  { background: linear-gradient(135deg,#0ea5e9,#0284c7); color:#fff; box-shadow:0 4px 14px rgba(14,165,233,0.35); }
+.btn-primary:hover  { transform:translateY(-2px); box-shadow:0 6px 20px rgba(14,165,233,0.45); }
+.btn-success  { background: linear-gradient(135deg,#10b981,#059669); color:#fff; box-shadow:0 4px 14px rgba(16,185,129,0.35); }
+.btn-success:hover  { transform:translateY(-2px); }
+.btn-ghost    { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.btn-ghost:hover    { background: #e2e8f0; color: #0f172a; }
+.btn-danger   { background: #ef4444; color: #fff; }
+.btn-outline  { background: transparent; border: 2px solid #0ea5e9; color: #0ea5e9; }
+.btn-outline:hover  { background: #e0f2fe; }
+.btn-sm   { padding: 7px 14px; font-size: 13px; border-radius: 8px; }
+.btn-lg   { padding: 15px 32px; font-size: 16px; border-radius: 12px; }
+.btn-full { width: 100%; }
+
+/* ── FORMS ── */
+.fg { margin-bottom: 16px; }
+.fg label { display: block; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.fi {
+  width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px;
+  font-size: 14px; color: #0f172a; background: #f8fafc; transition: border 0.2s, box-shadow 0.2s;
+}
+.fi:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 4px rgba(14,165,233,0.12); background: #fff; }
+.fi::placeholder { color: #94a3b8; }
+select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 13px center; padding-right: 38px; }
+.err { color: #ef4444; font-size: 12px; min-height: 16px; margin-top: 4px; font-weight: 500; }
+
+/* ── BADGES ── */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+.b-blue   { background:#dbeafe; color:#1d4ed8; }
+.b-green  { background:#d1fae5; color:#065f46; }
+.b-orange { background:#fef3c7; color:#92400e; }
+.b-red    { background:#fee2e2; color:#991b1b; }
+
+/* ── CARD ── */
+.card { background: #fff; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 16px rgba(14,165,233,0.07); }
+
+/* ══════════════════════════════
+   LANDING
+══════════════════════════════ */
+#pg-landing {
+  background: linear-gradient(150deg, #0a1628 0%, #0c3a62 55%, #0ea5e9 100%);
+  align-items: center;
+}
+.land-wrap { width: 100%; max-width: 1000px; margin: 0 auto; padding: 24px 24px 48px; }
+.land-nav { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 48px; }
+.land-logo { display: flex; align-items: center; gap: 10px; color: #fff; }
+.land-logo-icon { width: 40px; height: 40px; background: rgba(255,255,255,0.18); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.land-logo-text { font-size: 20px; font-weight: 800; }
+.land-hero { text-align: center; margin-bottom: 56px; }
+.land-pill { display: inline-block; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.25); color: #bae6fd; padding: 6px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; margin-bottom: 22px; }
+.land-h1 { font-size: clamp(38px, 7vw, 68px); font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 18px; }
+.land-h1 em { font-style: normal; background: linear-gradient(90deg, #38bdf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.land-sub { font-size: 17px; color: rgba(255,255,255,0.72); max-width: 520px; margin: 0 auto 44px; }
+.land-cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 52px; }
+.role-card {
+  background: rgba(255,255,255,0.1); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 22px;
+  padding: 36px 28px; width: 250px; text-align: center; color: #fff;
+  cursor: pointer; transition: all 0.25s;
+}
+.role-card:hover { background: rgba(255,255,255,0.2); transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,0,0,0.3); }
+.role-card-icon { font-size: 54px; margin-bottom: 14px; }
+.role-card-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.role-card-desc { font-size: 14px; opacity: 0.78; line-height: 1.5; margin-bottom: 22px; }
+.role-card-cta { display: inline-block; padding: 10px 26px; border-radius: 100px; font-size: 14px; font-weight: 700; }
+.role-card.doc .role-card-cta { background: #0ea5e9; color: #fff; }
+.role-card.pat .role-card-cta { background: #10b981; color: #fff; }
+.land-stats { display: flex; gap: 44px; justify-content: center; flex-wrap: wrap; color: rgba(255,255,255,0.88); }
+.land-stat-n { font-size: 30px; font-weight: 800; }
+.land-stat-l { font-size: 13px; opacity: 0.65; }
+
+/* ══════════════════════════════
+   AUTH PAGES  (shared layout)
+══════════════════════════════ */
+.auth-wrap { display: flex; flex: 1; min-height: 100vh; }
+
+/* Left panel */
+.auth-left { width: 42%; display: flex; flex-direction: column; padding: 40px; color: #fff; }
+.auth-left.doc-theme { background: linear-gradient(160deg, #0a1628, #0284c7); }
+.auth-left.pat-theme { background: linear-gradient(160deg, #052e16, #059669); }
+.auth-left-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 60px; }
+.auth-left-logo-icon { width: 38px; height: 38px; background: rgba(255,255,255,0.18); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.auth-left-logo-text { font-size: 18px; font-weight: 700; }
+.auth-left-body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.auth-left-icon { font-size: 60px; margin-bottom: 20px; }
+.auth-left-title { font-size: 34px; font-weight: 800; margin-bottom: 14px; line-height: 1.2; }
+.auth-left-sub { font-size: 15px; opacity: 0.78; margin-bottom: 28px; line-height: 1.6; }
+.auth-feats li { list-style: none; display: flex; align-items: center; gap: 10px; font-size: 14px; opacity: 0.88; margin-bottom: 10px; }
+.feat-tick { width: 20px; height: 20px; background: rgba(255,255,255,0.22); border-radius: 50%; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+
+/* Right panel */
+.auth-right { flex: 1; background: #f0f9ff; display: flex; align-items: center; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+.auth-box { width: 100%; max-width: 420px; }
+.auth-back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: #64748b; margin-bottom: 28px; background: none; border: none; padding: 0; }
+.auth-back:hover { color: #0ea5e9; }
+.auth-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; margin-bottom: 16px; }
+.auth-pill.doc { background: #dbeafe; color: #1d4ed8; }
+.auth-pill.pat { background: #d1fae5; color: #065f46; }
+.auth-title { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+.auth-sub   { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+/* Tabs */
+.tabs { display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; margin-bottom: 22px; }
+.tab-btn { flex: 1; padding: 9px; border-radius: 7px; font-size: 14px; font-weight: 600; color: #94a3b8; background: none; transition: all 0.18s; }
+.tab-btn.on { background: #fff; color: #0f172a; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.tab-pane { display: none; }
+.tab-pane.on { display: block; }
+.demo-hint { text-align: center; margin-top: 14px; font-size: 13px; color: #94a3b8; }
+.demo-hint strong { color: #475569; }
+
+@media (max-width: 768px) {
+  .auth-left { display: none; }
+  .auth-right { padding: 24px 16px; }
+}
+
+/* ══════════════════════════════
+   APP SHELL
+══════════════════════════════ */
+.app-page { display: flex; flex-direction: row; flex: 1; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 255px; background: #fff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 200; overflow-y: auto; }
+.sb-logo { padding: 20px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #e2e8f0; }
+.sb-logo-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+.sb-logo-icon.d { background: #dbeafe; }
+.sb-logo-icon.p { background: #d1fae5; }
+.sb-logo-text { font-size: 15px; font-weight: 700; }
+.sb-logo-role { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+.sb-user { padding: 14px 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; }
+.sb-user-name { font-weight: 600; font-size: 14px; }
+.sb-user-role { font-size: 12px; color: #94a3b8; }
+.sb-nav { padding: 10px; flex: 1; }
+.sb-section { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; padding: 12px 8px 6px; }
+.nv { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 9px; font-size: 14px; font-weight: 500; color: #64748b; width: 100%; background: none; text-align: left; transition: all 0.15s; }
+.nv:hover { background: #f8fafc; color: #0f172a; }
+.nv.on { font-weight: 600; }
+.nv.on.d-on { background: #dbeafe; color: #1d4ed8; }
+.nv.on.p-on { background: #d1fae5; color: #065f46; }
+.nv-icon { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+.nv-badge { margin-left: auto; background: #ef4444; color: #fff; font-size: 11px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 100px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+.sb-bottom { padding: 10px; border-top: 1px solid #e2e8f0; }
+
+/* Main */
+.main { margin-left: 255px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; background: #f0f9ff; }
+.top-bar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.top-bar-title { font-size: 20px; font-weight: 700; }
+.top-bar-right { display: flex; align-items: center; gap: 10px; }
+.ib { width: 38px; height: 38px; border-radius: 9px; background: #f1f5f9; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 17px; cursor: pointer; position: relative; }
+.ib:hover { background: #dbeafe; }
+.ndot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; background: #ef4444; border-radius: 50%; border: 1.5px solid #fff; }
+.av { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+.av-d { background: linear-gradient(135deg,#dbeafe,#bfdbfe); }
+.av-p { background: linear-gradient(135deg,#d1fae5,#a7f3d0); }
+.av-lg { width: 72px; height: 72px; font-size: 30px; }
+.body  { padding: 28px 28px; flex: 1; }
+
+/* Section views */
+.sv { display: none; }
+.sv.on { display: block; }
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-260px); transition: transform 0.3s; }
+  .main { margin-left: 0; }
+  .body { padding: 16px; }
+  .top-bar { padding: 12px 16px; }
+}
+
+/* ── STATS ── */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 14px; margin-bottom: 22px; }
+.stat-card { background: #fff; border-radius: 14px; padding: 18px; border: 1px solid #e2e8f0; }
+.stat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.stat-ico { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.ic-blue   { background: #dbeafe; }
+.ic-green  { background: #d1fae5; }
+.ic-purple { background: #ede9fe; }
+.ic-orange { background: #fef3c7; }
+.stat-val  { font-size: 26px; font-weight: 800; }
+.stat-lbl  { font-size: 13px; color: #64748b; }
+.stat-chg  { font-size: 12px; font-weight: 600; }
+.up   { color: #10b981; }
+.down { color: #ef4444; }
+
+/* ── GRID ── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.g3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+@media (max-width: 900px) { .g2,.g3 { grid-template-columns: 1fr; } }
+
+/* ── APPOINTMENT ITEMS ── */
+.ai { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: #f8fafc; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e2e8f0; transition: all 0.18s; }
+.ai:hover { background: #fff; box-shadow: 0 4px 16px rgba(14,165,233,0.08); }
+.ai-time { text-align: center; min-width: 52px; }
+.ai-hour { font-size: 14px; font-weight: 700; color: #0ea5e9; }
+.ai-date { font-size: 11px; color: #94a3b8; }
+.ai-bar  { width: 2px; height: 36px; background: #e2e8f0; border-radius: 2px; }
+.ai-info { flex: 1; }
+.ai-name { font-weight: 600; font-size: 14px; }
+.ai-meta { font-size: 13px; color: #64748b; }
+.ai-note { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+.ai-acts { display: flex; gap: 6px; }
+
+/* ── DOCTOR CARDS ── */
+.doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr)); gap: 14px; }
+.doc-card { background: #fff; border-radius: 14px; padding: 18px; border: 1px solid #e2e8f0; transition: all 0.2s; }
+.doc-card:hover { box-shadow: 0 8px 32px rgba(14,165,233,0.12); transform: translateY(-2px); }
+.doc-card-top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.doc-ava { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg,#dbeafe,#bfdbfe); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.doc-name { font-weight: 700; font-size: 15px; }
+.doc-spec { color: #0ea5e9; font-size: 13px; font-weight: 600; }
+.doc-meta { font-size: 12px; color: #64748b; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.doc-meta span { display: flex; align-items: center; gap: 3px; }
+.doc-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+.doc-acts { display: flex; gap: 8px; }
+
+/* ── SEARCH ── */
+.search-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.search-wrap { flex: 1; min-width: 180px; position: relative; }
+.search-wrap .s-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 15px; }
+.search-wrap .fi { padding-left: 38px; }
+
+/* ── EMPTY STATE ── */
+.empty { text-align: center; padding: 40px 20px; color: #64748b; }
+.empty-ico { font-size: 44px; margin-bottom: 10px; }
+.empty-title { font-size: 17px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+.empty-sub   { font-size: 14px; }
+
+/* ── PROFILE HERO ── */
+.prof-hero { border-radius: 16px; padding: 28px; color: #fff; margin-bottom: 22px; display: flex; gap: 22px; align-items: center; }
+.prof-hero.d-hero { background: linear-gradient(135deg,#0ea5e9,#0284c7); }
+.prof-hero.p-hero { background: linear-gradient(135deg,#10b981,#059669); }
+.prof-name { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+.prof-role { font-size: 14px; opacity: 0.82; margin-bottom: 12px; }
+.prof-meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; opacity: 0.9; }
+
+/* ── CHATBOT ── */
+.chat-wrap  { display: flex; flex-direction: column; height: calc(100vh - 73px); }
+.chat-head  { padding: 16px 20px; display: flex; align-items: center; gap: 12px; color: #fff; flex-shrink: 0; border-radius: 14px 14px 0 0; }
+.chat-head.d-head { background: linear-gradient(135deg,#0ea5e9,#0284c7); }
+.chat-head.p-head { background: linear-gradient(135deg,#10b981,#059669); }
+.chat-bot-ava { width: 42px; height: 42px; background: rgba(255,255,255,0.22); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.chat-bot-name { font-weight: 700; font-size: 15px; }
+.chat-bot-status { font-size: 12px; opacity: 0.8; display: flex; align-items: center; gap: 5px; }
+.odot { width: 7px; height: 7px; background: #86efac; border-radius: 50%; }
+.chat-msgs { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; }
+.msg { display: flex; gap: 8px; max-width: 80%; }
+.msg.bot { align-self: flex-start; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-ava { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+.msg-ava.bot  { background: #dbeafe; }
+.msg-ava.user { background: linear-gradient(135deg,#0ea5e9,#0284c7); }
+.bubble { padding: 11px 15px; border-radius: 16px; font-size: 14px; line-height: 1.55; }
+.bubble.bot  { background: #fff; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
+.bubble.user { background: linear-gradient(135deg,#0ea5e9,#0284c7); color: #fff; border-bottom-right-radius: 4px; }
+.msg-time { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+.typing { display: flex; gap: 5px; align-items: center; padding: 11px 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; border-bottom-left-radius: 4px; width: fit-content; }
+.tdot { width: 7px; height: 7px; background: #94a3b8; border-radius: 50%; animation: bounce 1.2s infinite; }
+.tdot:nth-child(2) { animation-delay: 0.2s; }
+.tdot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+.qr-row { display: flex; flex-wrap: wrap; gap: 7px; padding: 10px 18px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+.qr { padding: 7px 14px; border-radius: 100px; font-size: 13px; font-weight: 500; border: 1.5px solid #0ea5e9; color: #0ea5e9; background: #fff; transition: all 0.18s; }
+.qr:hover { background: #0ea5e9; color: #fff; }
+.chat-foot { padding: 12px 18px; background: #fff; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+.chat-in { flex: 1; padding: 10px 16px; border: 2px solid #e2e8f0; border-radius: 100px; font-size: 14px; transition: border 0.2s; }
+.chat-in:focus { outline: none; border-color: #0ea5e9; }
+.chat-send { width: 42px; height: 42px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; transition: transform 0.18s; }
+.chat-send.d-send { background: linear-gradient(135deg,#0ea5e9,#0284c7); }
+.chat-send.p-send { background: linear-gradient(135deg,#10b981,#059669); }
+.chat-send:hover { transform: scale(1.08); }
+
+/* ── VIDEO MEETING ── */
+.meet-room { background: #0f172a; border-radius: 14px; overflow: hidden; }
+.meet-info  { padding: 10px 16px; background: #0f172a; color: #94a3b8; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+.meet-live  { color: #86efac; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+.live-dot   { width: 7px; height: 7px; background: #86efac; border-radius: 50%; animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.meet-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; min-height: 240px; }
+.vid-tile   { background: #1e293b; display: flex; align-items: center; justify-content: center; position: relative; padding: 20px; min-height: 120px; }
+.vid-tile.full { grid-column: 1/-1; min-height: 220px; }
+.vid-lbl    { position: absolute; bottom: 8px; left: 10px; background: rgba(0,0,0,0.55); color: #fff; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 100px; }
+.vid-av     { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg,#1e40af,#0ea5e9); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+.ctrl-row   { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px; background: #1e293b; }
+.ctrl { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; border: none; cursor: pointer; transition: all 0.18s; }
+.ctrl.grey { background: #334155; color: #fff; }
+.ctrl.red  { background: #ef4444; color: #fff; }
+.ctrl.muted { background: #7f1d1d; color: #fff; }
+.ctrl.end  { width: 54px; height: 54px; font-size: 20px; }
+.ctrl:hover { opacity: 0.82; transform: scale(1.06); }
+</style>
+</head>
+<body>
+
+<!-- ████████ LANDING PAGE ████████ -->
+<div id="pg-landing" class="page active">
+  <div class="land-wrap">
+    <nav class="land-nav">
+      <div class="land-logo">
+        <div class="land-logo-icon">🏥</div>
+        <span class="land-logo-text">MediCare Pro</span>
+      </div>
+    </nav>
+    <div class="land-hero">
+      <div class="land-pill">✦ Trusted by 50,000+ Healthcare Professionals</div>
+      <h1 class="land-h1">Healthcare Made<br><em>Simple &amp; Smart</em></h1>
+      <p class="land-sub">Connect doctors and patients seamlessly. Book appointments, consult online, and manage health records — all in one place.</p>
+      <div class="land-cards">
+        <div class="role-card doc" onclick="show('pg-doctor-login')">
+          <div class="role-card-icon">👨‍⚕️</div>
+          <div class="role-card-title">I'm a Doctor</div>
+          <div class="role-card-desc">Manage appointments, consult patients, and grow your practice.</div>
+          <span class="role-card-cta">Doctor Portal →</span>
+        </div>
+        <div class="role-card pat" onclick="show('pg-patient-login')">
+          <div class="role-card-icon">🧑‍💼</div>
+          <div class="role-card-title">I'm a Patient</div>
+          <div class="role-card-desc">Find doctors, book appointments, and track your wellness.</div>
+          <span class="role-card-cta">Patient Portal →</span>
+        </div>
+      </div>
+      <div class="land-stats">
+        <div style="text-align:center"><div class="land-stat-n">50K+</div><div class="land-stat-l">Doctors</div></div>
+        <div style="text-align:center"><div class="land-stat-n">2M+</div><div class="land-stat-l">Patients</div></div>
+        <div style="text-align:center"><div class="land-stat-n">99.9%</div><div class="land-stat-l">Uptime</div></div>
+        <div style="text-align:center"><div class="land-stat-n">4.9 ★</div><div class="land-stat-l">Rating</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████████ DOCTOR LOGIN PAGE ████████ -->
+<div id="pg-doctor-login" class="page">
+  <div class="auth-wrap">
+    <div class="auth-left doc-theme">
+      <div class="auth-left-logo">
+        <div class="auth-left-logo-icon">🏥</div>
+        <span class="auth-left-logo-text">MediCare Pro</span>
+      </div>
+      <div class="auth-left-body">
+        <div class="auth-left-icon">👨‍⚕️</div>
+        <h2 class="auth-left-title">Welcome,<br>Doctor</h2>
+        <p class="auth-left-sub">Access your professional dashboard to manage patients, appointments, and consultations.</p>
+        <ul class="auth-feats">
+          <li><span class="feat-tick">✓</span> Manage your appointment calendar</li>
+          <li><span class="feat-tick">✓</span> Video consultations with patients</li>
+          <li><span class="feat-tick">✓</span> Access patient medical records</li>
+          <li><span class="feat-tick">✓</span> AI-powered clinical assistant</li>
+        </ul>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-box">
+        <button class="auth-back" onclick="show('pg-landing')">← Back to Home</button>
+        <div class="auth-pill doc">👨‍⚕️ Doctor Portal</div>
+        <h2 class="auth-title">Doctor Sign In</h2>
+        <p class="auth-sub">Access your professional dashboard</p>
+        <div class="tabs">
+          <button class="tab-btn on" onclick="switchTab('d','login',this)">Login</button>
+          <button class="tab-btn"    onclick="switchTab('d','register',this)">Register</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="d-pane-login" class="tab-pane on">
+          <div class="fg">
+            <label>Email Address</label>
+            <input id="d-em" type="email" class="fi" placeholder="doctor@hospital.com"/>
+            <div class="err" id="d-em-err"></div>
+          </div>
+          <div class="fg">
+            <label>Password</label>
+            <input id="d-pw" type="password" class="fi" placeholder="Your password"/>
+            <div class="err" id="d-pw-err"></div>
+          </div>
+          <button class="btn btn-primary btn-full btn-lg" onclick="doctorLogin()">Sign In to Doctor Portal</button>
+          <div class="demo-hint">Demo: <strong>doctor@test.com</strong> / <strong>password123</strong></div>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="d-pane-register" class="tab-pane">
+          <div class="fg">
+            <label>Full Name</label>
+            <input id="d-rn" type="text" class="fi" placeholder="Dr. John Smith"/>
+            <div class="err" id="d-rn-err"></div>
+          </div>
+          <div class="fg">
+            <label>Email</label>
+            <input id="d-re" type="email" class="fi" placeholder="doctor@hospital.com"/>
+            <div class="err" id="d-re-err"></div>
+          </div>
+          <div class="fg">
+            <label>Specialty</label>
+            <select id="d-rs" class="fi">
+              <option value="">Select specialty…</option>
+              <option>Cardiology</option><option>Neurology</option><option>Pediatrics</option>
+              <option>Orthopedics</option><option>Dermatology</option><option>General Medicine</option>
+            </select>
+            <div class="err" id="d-rs-err"></div>
+          </div>
+          <div class="fg">
+            <label>Password</label>
+            <input id="d-rp" type="password" class="fi" placeholder="Min 6 characters"/>
+            <div class="err" id="d-rp-err"></div>
+          </div>
+          <button class="btn btn-primary btn-full btn-lg" onclick="doctorRegister()">Create Doctor Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████████ PATIENT LOGIN PAGE ████████ -->
+<div id="pg-patient-login" class="page">
+  <div class="auth-wrap">
+    <div class="auth-left pat-theme">
+      <div class="auth-left-logo">
+        <div class="auth-left-logo-icon">🏥</div>
+        <span class="auth-left-logo-text">MediCare Pro</span>
+      </div>
+      <div class="auth-left-body">
+        <div class="auth-left-icon">🧑‍💼</div>
+        <h2 class="auth-left-title">Welcome,<br>Patient</h2>
+        <p class="auth-left-sub">Your health, our priority. Book appointments, consult doctors, and track your wellness journey.</p>
+        <ul class="auth-feats">
+          <li><span class="feat-tick">✓</span> Find &amp; book top doctors instantly</li>
+          <li><span class="feat-tick">✓</span> Video &amp; chat consultations</li>
+          <li><span class="feat-tick">✓</span> View prescriptions &amp; reports</li>
+          <li><span class="feat-tick">✓</span> AI health assistant 24/7</li>
+        </ul>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-box">
+        <button class="auth-back" onclick="show('pg-landing')">← Back to Home</button>
+        <div class="auth-pill pat">🧑‍💼 Patient Portal</div>
+        <h2 class="auth-title">Patient Sign In</h2>
+        <p class="auth-sub">Access your health dashboard</p>
+        <div class="tabs">
+          <button class="tab-btn on" onclick="switchTab('p','login',this)">Login</button>
+          <button class="tab-btn"    onclick="switchTab('p','register',this)">Register</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="p-pane-login" class="tab-pane on">
+          <div class="fg">
+            <label>Email Address</label>
+            <input id="p-em" type="email" class="fi" placeholder="you@email.com"/>
+            <div class="err" id="p-em-err"></div>
+          </div>
+          <div class="fg">
+            <label>Password</label>
+            <input id="p-pw" type="password" class="fi" placeholder="Your password"/>
+            <div class="err" id="p-pw-err"></div>
+          </div>
+          <button class="btn btn-success btn-full btn-lg" onclick="patientLogin()">Sign In to Patient Portal</button>
+          <div class="demo-hint">Demo: <strong>patient@test.com</strong> / <strong>password123</strong></div>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="p-pane-register" class="tab-pane">
+          <div class="fg">
+            <label>Full Name</label>
+            <input id="p-rn" type="text" class="fi" placeholder="John Doe"/>
+            <div class="err" id="p-rn-err"></div>
+          </div>
+          <div class="fg">
+            <label>Email</label>
+            <input id="p-re" type="email" class="fi" placeholder="you@email.com"/>
+            <div class="err" id="p-re-err"></div>
+          </div>
+          <div class="fg">
+            <label>Date of Birth</label>
+            <input id="p-rb" type="date" class="fi"/>
+          </div>
+          <div class="fg">
+            <label>Phone</label>
+            <input id="p-rph" type="tel" class="fi" placeholder="+1 234 567 8900"/>
+          </div>
+          <div class="fg">
+            <label>Password</label>
+            <input id="p-rp" type="password" class="fi" placeholder="Min 6 characters"/>
+            <div class="err" id="p-rp-err"></div>
+          </div>
+          <button class="btn btn-success btn-full btn-lg" onclick="patientRegister()">Create Patient Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████████ DOCTOR APP ████████ -->
+<div id="pg-doctor-app" class="page">
+  <div class="app-page">
+    <div class="sidebar" id="d-sidebar">
+      <div class="sb-logo">
+        <div class="sb-logo-icon d">🏥</div>
+        <div>
+          <div class="sb-logo-text">MediCare Pro</div>
+          <div class="sb-logo-role">Doctor Portal</div>
+        </div>
+      </div>
+      <div class="sb-user">
+        <div class="av av-d">👨‍⚕️</div>
+        <div>
+          <div class="sb-user-name" id="d-sb-name">Dr. Smith</div>
+          <div class="sb-user-role">Cardiologist · Online</div>
+        </div>
+      </div>
+      <div class="sb-nav">
+        <div class="sb-section">Main</div>
+        <button class="nv on d-on" data-sec="d-dash"    onclick="dNav('d-dash',this)"><span class="nv-icon">📊</span>Dashboard</button>
+        <button class="nv"         data-sec="d-appts"   onclick="dNav('d-appts',this)"><span class="nv-icon">📅</span>Appointments<span class="nv-badge" id="d-badge">3</span></button>
+        <button class="nv"         data-sec="d-patients" onclick="dNav('d-patients',this)"><span class="nv-icon">👥</span>My Patients</button>
+        <button class="nv"         data-sec="d-meeting"  onclick="dNav('d-meeting',this)"><span class="nv-icon">📹</span>Video Consult</button>
+        <div class="sb-section">Tools</div>
+        <button class="nv"         data-sec="d-chat"     onclick="dNav('d-chat',this)"><span class="nv-icon">🤖</span>AI Assistant<span class="nv-badge">!</span></button>
+        <button class="nv"         data-sec="d-profile"  onclick="dNav('d-profile',this)"><span class="nv-icon">👤</span>Profile</button>
+      </div>
+      <div class="sb-bottom">
+        <button class="nv" onclick="logout()" style="color:#ef4444"><span class="nv-icon">🚪</span>Logout</button>
+      </div>
+    </div>
+    <div class="main">
+      <div class="top-bar">
+        <div class="top-bar-title" id="d-page-title">Dashboard</div>
+        <div class="top-bar-right">
+          <div class="ib">🔔<span class="ndot"></span></div>
+          <div class="av av-d" onclick="dNav('d-profile',null)">👨‍⚕️</div>
+        </div>
+      </div>
+      <div class="body">
+
+        <!-- DASHBOARD -->
+        <div id="d-dash" class="sv on">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-top"><div class="stat-ico ic-blue">📅</div><span class="stat-chg up">↑ 12%</span></div><div class="stat-val">24</div><div class="stat-lbl">Today's Appointments</div></div>
+            <div class="stat-card"><div class="stat-top"><div class="stat-ico ic-green">👥</div><span class="stat-chg up">↑ 8%</span></div><div class="stat-val">186</div><div class="stat-lbl">Total Patients</div></div>
+            <div class="stat-card"><div class="stat-top"><div class="stat-ico ic-purple">📹</div><span class="stat-chg up">↑ 5%</span></div><div class="stat-val">8</div><div class="stat-lbl">Video Consults Today</div></div>
+            <div class="stat-card"><div class="stat-top"><div class="stat-ico ic-orange">⭐</div><span class="stat-chg up">+0.2</span></div><div class="stat-val">4.9</div><div class="stat-lbl">Patient Rating</div></div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <h3 style="font-size:15px;margin-bottom:14px;">📅 Today's Schedule</h3>
+              <div id="d-today-list"></div>
+            </div>
+            <div class="card">
+              <h3 style="font-size:15px;margin-bottom:14px;">⚡ Quick Actions</h3>
+              <div style="display:flex;flex-direction:column;gap:9px;">
+                <button class="btn btn-primary btn-full" onclick="dNav('d-meeting',null);beginMeet('d')">📹 Start Video Consult</button>
+                <button class="btn btn-ghost btn-full"   onclick="dNav('d-appts',null)">📅 View All Appointments</button>
+                <button class="btn btn-ghost btn-full"   onclick="dNav('d-patients',null)">👥 View Patients</button>
+                <button class="btn btn-ghost btn-full"   onclick="dNav('d-chat',null)">🤖 Open AI Assistant</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- APPOINTMENTS -->
+        <div id="d-appts" class="sv">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+              <h3 style="font-size:15px;">All Appointments</h3>
+              <button class="btn btn-primary btn-sm" onclick="openModal('mo-appt')">+ New Appointment</button>
+            </div>
+            <div id="d-appt-list"></div>
+          </div>
+        </div>
+
+        <!-- PATIENTS -->
+        <div id="d-patients" class="sv">
+          <div class="search-row">
+            <div class="search-wrap"><span class="s-icon">🔍</span><input type="text" class="fi" placeholder="Search patients…"/></div>
+          </div>
+          <div class="doc-grid" id="d-pat-grid"></div>
+        </div>
+
+        <!-- MEETING -->
+        <div id="d-meeting" class="sv">
+          <div class="card">
+            <h3 style="font-size:15px;margin-bottom:4px;">📹 Video Consultation Room</h3>
+            <p style="color:#64748b;font-size:14px;margin-bottom:18px;">Start a live video consultation with your patient.</p>
+            <div class="meet-room">
+              <div class="meet-info">
+                <span>Room: <strong>ROOM-DR-001</strong></span>
+                <span id="d-live" class="meet-live" style="display:none"><span class="live-dot"></span>LIVE</span>
+                <span id="d-timer" style="display:none;font-size:13px;color:#94a3b8;">00:00</span>
+              </div>
+              <div class="meet-grid" id="d-vgrid">
+                <div class="vid-tile full">
+                  <div class="vid-av" id="d-main-av">👨‍⚕️</div>
+                  <span class="vid-lbl" id="d-main-lbl">Click "Start Consultation" to begin</span>
+                </div>
+              </div>
+              <div class="ctrl-row">
+                <div class="ctrl grey" id="d-mute" onclick="toggleMute('d')" title="Mute">🎙️</div>
+                <div class="ctrl grey" id="d-cam"  onclick="toggleCam('d')"  title="Camera">📷</div>
+                <div class="ctrl red end" onclick="endMeet('d')" title="End">📵</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="beginMeet('d')">▶ Start Consultation</button>
+              <input id="d-room-in" class="fi" style="flex:1;min-width:160px;" placeholder="Or enter room code…"/>
+              <button class="btn btn-ghost" onclick="joinRoom('d')">Join</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI CHAT -->
+        <div id="d-chat" class="sv" style="margin:-28px -28px;height:calc(100vh - 73px);">
+          <div class="chat-wrap">
+            <div class="chat-head d-head">
+              <div class="chat-bot-ava">🤖</div>
+              <div>
+                <div class="chat-bot-name">MediBot Clinical AI</div>
+                <div class="chat-bot-status"><span class="odot"></span>Online · Medical Assistant</div>
+              </div>
+            </div>
+            <div class="chat-msgs" id="d-msgs"></div>
+            <div class="qr-row" id="d-qr">
+              <button class="qr" onclick="qSend('d','Summarise today\'s patients')">📋 Today's patients</button>
+              <button class="qr" onclick="qSend('d','Drug interaction check for aspirin and warfarin')">💊 Drug interactions</button>
+              <button class="qr" onclick="qSend('d','Give me a general cardiology reference')">📚 Medical reference</button>
+              <button class="qr" onclick="qSend('d','Appointment schedule overview')">📅 Schedule overview</button>
+            </div>
+            <div class="chat-foot">
+              <input id="d-cin" class="chat-in" type="text" placeholder="Ask a clinical question…" onkeydown="if(event.key==='Enter')chat('d')"/>
+              <button class="chat-send d-send" onclick="chat('d')">➤</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROFILE -->
+        <div id="d-profile" class="sv">
+          <div class="prof-hero d-hero">
+            <div class="av av-d av-lg">👨‍⚕️</div>
+            <div>
+              <div class="prof-name" id="d-prof-name">Dr. Sarah Johnson</div>
+              <div class="prof-role">Senior Cardiologist · MediCare Pro</div>
+              <div class="prof-meta"><span>📧 doctor@test.com</span><span>🏥 City General</span><span>⭐ 4.9</span><span>👥 186 patients</span></div>
+            </div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <h3 style="font-size:15px;margin-bottom:14px;">Personal Information</h3>
+              <div class="fg"><label>Full Name</label><input class="fi" value="Dr. Sarah Johnson"/></div>
+              <div class="fg"><label>Specialty</label><input class="fi" value="Cardiology"/></div>
+              <div class="fg"><label>Hospital</label><input class="fi" value="City General Hospital"/></div>
+              <div class="fg"><label>Phone</label><input class="fi" value="+1 555 123 4567"/></div>
+              <button class="btn btn-primary" onclick="toast('Changes saved!','success')">Save Changes</button>
+            </div>
+            <div class="card">
+              <h3 style="font-size:15px;margin-bottom:14px;">Practice Info</h3>
+              <div class="fg"><label>License No.</label><input class="fi" value="MED-54321"/></div>
+              <div class="fg"><label>Experience</label><input class="fi" value="12 years"/></div>
+              <div class="fg"><label>Consultation Fee</label><input class="fi" value="$150"/></div>
+              <div class="fg"><label>Bio</label><textarea class="fi" rows="3">Experienced cardiologist specialising in preventive care and heart failure.</textarea></div>
+              <button class="btn btn-primary" onclick="toast('Changes saved!','success')">Save Changes</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /body -->
+    </div><!-- /main -->
+  </div><!-- /app-page -->
+</div>
+
+<!-- ████████ PATIENT APP ████████ -->
+<div id="pg-patient-app" class="page">
+  <div class="app-page">
+    <div class="sidebar" id="p-sidebar">
+      <div class="sb-logo">
+        <div class="sb-logo-icon p">🏥</div>
+        <div>
+          <div class="sb-logo-text">MediCare Pro</div>
+          <div class="sb-logo-role">Patient Portal</div>
+        </div>
+      </div>
+      <div class="sb-user">
+        <div class="av av-p">🧑‍💼</div>
+        <div>
+          <div class="sb-user-name" id="p-sb-name">John Doe</div>
+          <div class="sb-user-role">Patient · Active</div>
+        </div>
+      </div>
+      <div class="sb-nav">
+        <div class="sb-section">Main</div>
+        <button class="nv on p-on" data-sec="p-dash"     onclick="pNav('p-dash',this)"><span class="nv-icon">📊</span>Dashboard</button>
+        <button class="nv"         data-sec="p-doctors"   onclick="pNav('p-doctors',this)"><span class="nv-icon">🔍</span>Find Doctors</button>
+        <button class="nv"         data-sec="p-appts"     onclick="pNav('p-appts',this)"><span class="nv-icon">📅</span>My Appointments<span class="nv-badge" id="p-badge">2</span></button>
+        <button class="nv"         data-sec="p-meeting"   onclick="pNav('p-meeting',this)"><span class="nv-icon">📹</span>Video Consult</button>
+        <div class="sb-section">Tools</div>
+        <button class="nv"         data-sec="p-chat"      onclick="pNav('p-chat',this)"><span class="nv-icon">🤖</span>AI Health Chat<span class="nv-badge">!</span></button>
+        <button class="nv"         data-sec="p-profile"   onclick="pNav('p-profile',this)"><span class="nv-icon">👤</span>My Profile</button>
+      </div>
+      <div class="sb-bottom">
+        <button class="nv" onclick="logout()" style="color:#ef4444"><span class="nv-icon">🚪</span>Logout</button>
+      </div>
+    </div>
+    <div class="main">
+      <div class="top-bar">
+        <div class="top-bar-title" id="p-page-title">Dashboard</div>
+        <div class="top-bar-right">
+          <div class="ib">🔔<span class="ndot"></span></div>
+          <div class="av av-p" onclick="pNav('p-profile',null)">🧑‍💼</div>
+        </div>
+      </div>
+      <div class="body">
+
+        <!-- DASHBOARD -->
+        <div id="p-dash" class="sv on">
+          <div style="margin-bottom:18px;">
+            <h2 style="font-size:20px;font-weight:700;">Good morning, <span id="p-greet">John</span>! 👋</h2>
+            <p style="color:#64748b;font-size:14px;margin-top:2px;">Here's your health summary.</p>
+          </div>
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-top"><div class="stat-ico ic-blue">📅</div></div><div class="stat-val" id="p-upcount">2</div><div class="stat-lbl">Upcoming Appointments</div></div>
+            <div class="stat-card"><div class="stat-top"><div class="stat-ico ic-green">💊</div></div><div class="stat-val">3</div><div class="stat-lbl">Active Prescriptions</div></div>
+            <div class="stat-card"><div class="stat-top"><div class="stat-ico ic-purple">🩺</div></div><div class="stat-val">5</div><div class="stat-lbl">Doctors Consulted</div></div>
+            <div class="stat-card"><div class="stat-top"><div class="stat-ico ic-orange">❤️</div></div><div class="stat-val">72</div><div class="stat-lbl">Heart Rate (bpm)</div></div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <h3 style="font-size:15px;margin-bottom:14px;">📅 Upcoming Appointments</h3>
+              <div id="p-dash-appts"></div>
+              <button class="btn btn-outline btn-full btn-sm" style="margin-top:12px;" onclick="pNav('p-appts',null)">View All</button>
+            </div>
+            <div class="card">
+              <h3 style="font-size:15px;margin-bottom:14px;">🚀 Quick Actions</h3>
+              <div style="display:flex;flex-direction:column;gap:9px;">
+                <button class="btn btn-success btn-full" onclick="pNav('p-doctors',null)">🔍 Find a Doctor</button>
+                <button class="btn btn-ghost btn-full"   onclick="pNav('p-meeting',null)">📹 Join Video Consult</button>
+                <button class="btn btn-ghost btn-full"   onclick="pNav('p-chat',null)">🤖 AI Health Assistant</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FIND DOCTORS -->
+        <div id="p-doctors" class="sv">
+          <div class="search-row">
+            <div class="search-wrap" style="flex:2;"><span class="s-icon">🔍</span><input type="text" class="fi" placeholder="Search name or specialty…" oninput="filterDocs(this.value)"/></div>
+            <select class="fi" style="flex:1;min-width:140px;" onchange="filterSpec(this.value)">
+              <option value="">All Specialties</option>
+              <option>Cardiology</option><option>Neurology</option><option>Pediatrics</option>
+              <option>Orthopedics</option><option>Dermatology</option><option>General Medicine</option>
+            </select>
+          </div>
+          <div class="doc-grid" id="p-doc-grid"></div>
+        </div>
+
+        <!-- APPOINTMENTS -->
+        <div id="p-appts" class="sv">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+              <h3 style="font-size:15px;">My Appointments</h3>
+              <button class="btn btn-success btn-sm" onclick="pNav('p-doctors',null)">+ Book New</button>
+            </div>
+            <div id="p-appt-list"></div>
+          </div>
+        </div>
+
+        <!-- MEETING -->
+        <div id="p-meeting" class="sv">
+          <div class="card">
+            <h3 style="font-size:15px;margin-bottom:4px;">📹 Join Video Consultation</h3>
+            <p style="color:#64748b;font-size:14px;margin-bottom:18px;">Enter your doctor's room code to join the consultation.</p>
+            <div class="meet-room">
+              <div class="meet-info">
+                <span>Room: <strong id="p-room-lbl">—</strong></span>
+                <span id="p-live" class="meet-live" style="display:none"><span class="live-dot"></span>LIVE</span>
+                <span id="p-timer" style="display:none;font-size:13px;color:#94a3b8;">00:00</span>
+              </div>
+              <div class="meet-grid" id="p-vgrid">
+                <div class="vid-tile full">
+                  <div class="vid-av" id="p-main-av">🧑‍💼</div>
+                  <span class="vid-lbl" id="p-main-lbl">Enter room code and click Join</span>
+                </div>
+              </div>
+              <div class="ctrl-row">
+                <div class="ctrl grey" id="p-mute" onclick="toggleMute('p')" title="Mute">🎙️</div>
+                <div class="ctrl grey" id="p-cam"  onclick="toggleCam('p')"  title="Camera">📷</div>
+                <div class="ctrl red end" onclick="endMeet('p')" title="Leave">📵</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+              <input id="p-room-in" class="fi" style="flex:1;min-width:160px;" placeholder="Room code (e.g. ROOM-DR-001)" value="ROOM-DR-001"/>
+              <button class="btn btn-success" onclick="joinRoom('p')">▶ Join Consultation</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI CHAT -->
+        <div id="p-chat" class="sv" style="margin:-28px -28px;height:calc(100vh - 73px);">
+          <div class="chat-wrap">
+            <div class="chat-head p-head">
+              <div class="chat-bot-ava">🤖</div>
+              <div>
+                <div class="chat-bot-name">MediBot Health Assistant</div>
+                <div class="chat-bot-status"><span class="odot"></span>Online · 24/7 Support</div>
+              </div>
+            </div>
+            <div class="chat-msgs" id="p-msgs"></div>
+            <div class="qr-row" id="p-qr">
+              <button class="qr" onclick="qSend('p','I have a headache, what should I do?')">🤕 Headache help</button>
+              <button class="qr" onclick="qSend('p','How do I book an appointment?')">📅 Book appointment</button>
+              <button class="qr" onclick="qSend('p','Which specialist do I need for chest pain?')">🩺 Which doctor?</button>
+              <button class="qr" onclick="qSend('p','Tell me about my medications')">💊 My medications</button>
+            </div>
+            <div class="chat-foot">
+              <input id="p-cin" class="chat-in" type="text" placeholder="Describe symptoms or ask a question…" onkeydown="if(event.key==='Enter')chat('p')"/>
+              <button class="chat-send p-send" onclick="chat('p')">➤</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROFILE -->
+        <div id="p-profile" class="sv">
+          <div class="prof-hero p-hero">
+            <div class="av av-p av-lg">🧑‍💼</div>
+            <div>
+              <div class="prof-name" id="p-prof-name">John Doe</div>
+              <div class="prof-role">Patient · MediCare Pro</div>
+              <div class="prof-meta"><span>📧 patient@test.com</span><span>📱 +1 555 000 1234</span><span>🎂 Jan 15, 1990</span></div>
+            </div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <h3 style="font-size:15px;margin-bottom:14px;">Personal Information</h3>
+              <div class="fg"><label>Full Name</label><input class="fi" value="John Doe"/></div>
+              <div class="fg"><label>Email</label><input class="fi" value="patient@test.com"/></div>
+              <div class="fg"><label>Phone</label><input class="fi" value="+1 555 000 1234"/></div>
+              <div class="fg"><label>Date of Birth</label><input class="fi" type="date" value="1990-01-15"/></div>
+              <div class="fg"><label>Blood Group</label><select class="fi"><option>A+</option><option>B+</option><option>O+</option><option>AB+</option><option>O-</option></select></div>
+              <button class="btn btn-success" onclick="toast('Changes saved!','success')">Save Changes</button>
+            </div>
+            <div class="card">
+              <h3 style="font-size:15px;margin-bottom:14px;">Health Information</h3>
+              <div class="fg"><label>Height (cm)</label><input class="fi" value="175"/></div>
+              <div class="fg"><label>Weight (kg)</label><input class="fi" value="70"/></div>
+              <div class="fg"><label>Allergies</label><textarea class="fi" rows="2">Penicillin, Peanuts</textarea></div>
+              <div class="fg"><label>Chronic Conditions</label><textarea class="fi" rows="2">None</textarea></div>
+              <button class="btn btn-success" onclick="toast('Health info saved!','success')">Save Health Info</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /body -->
+    </div><!-- /main -->
+  </div><!-- /app-page -->
+</div>
+
+<!-- ████████ MODALS ████████ -->
+
+<!-- Book Appointment (Doctor) -->
+<div class="overlay" id="mo-appt">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal('mo-appt')">✕</button>
+    <h3>Book Appointment</h3>
+    <p>Schedule a new patient appointment.</p>
+    <div class="fg"><label>Patient Name</label><input id="mo-pat" class="fi" placeholder="Patient name"/><div class="err" id="mo-pat-err"></div></div>
+    <div class="fg"><label>Date</label><input id="mo-date" type="date" class="fi"/><div class="err" id="mo-date-err"></div></div>
+    <div class="fg"><label>Time</label>
+      <select id="mo-time" class="fi">
+        <option>09:00 AM</option><option>09:30 AM</option><option>10:00 AM</option>
+        <option>10:30 AM</option><option>11:00 AM</option><option>02:00 PM</option>
+        <option>03:00 PM</option><option>04:00 PM</option>
+      </select>
+    </div>
+    <div class="fg"><label>Type</label>
+      <select id="mo-type" class="fi"><option>In-Person Visit</option><option>Video Consultation</option><option>Follow-up</option></select>
+    </div>
+    <div class="fg"><label>Notes (optional)</label><textarea id="mo-notes" class="fi" rows="3" placeholder="Reason for visit…"></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button class="btn btn-ghost btn-full" onclick="closeModal('mo-appt')">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveDocAppt()">Book Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Book with Doctor (Patient) -->
+<div class="overlay" id="mo-book">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal('mo-book')">✕</button>
+    <h3 id="mo-book-title">Book Appointment</h3>
+    <p>Choose your preferred slot.</p>
+    <div class="fg"><label>Date</label><input id="mb-date" type="date" class="fi"/><div class="err" id="mb-date-err"></div></div>
+    <div class="fg"><label>Time</label>
+      <select id="mb-time" class="fi"><option>09:00 AM</option><option>10:00 AM</option><option>11:00 AM</option><option>02:00 PM</option><option>03:00 PM</option><option>04:00 PM</option></select>
+    </div>
+    <div class="fg"><label>Type</label>
+      <select id="mb-type" class="fi"><option>In-Person Visit</option><option>Video Consultation</option></select>
+    </div>
+    <div class="fg"><label>Reason</label><textarea id="mb-reason" class="fi" rows="3" placeholder="Describe your symptoms…"></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button class="btn btn-ghost btn-full" onclick="closeModal('mo-book')">Cancel</button>
+      <button class="btn btn-success btn-full" onclick="confirmBook()">Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* =========================================================
+   STATE
+========================================================= */
+const DOCTORS_DB = {
+  'doctor@test.com': { pass:'password123', name:'Dr. Sarah Johnson', spec:'Cardiology' }
+};
+const PATIENTS_DB = {
+  'patient@test.com': { pass:'password123', name:'John Doe' }
+};
+
+let docAppts = [
+  { id:1, patient:'John Doe',     time:'09:00 AM', date:'Today',    type:'Video Consultation', status:'confirmed', notes:'Follow-up on chest pain' },
+  { id:2, patient:'Jane Smith',   time:'10:30 AM', date:'Today',    type:'In-Person Visit',    status:'confirmed', notes:'Annual checkup' },
+  { id:3, patient:'Mike Johnson', time:'02:00 PM', date:'Today',    type:'Follow-up',          status:'pending',  notes:'Post-surgery review' },
+  { id:4, patient:'Emily Davis',  time:'10:00 AM', date:'Tomorrow', type:'In-Person Visit',    status:'confirmed', notes:'BP check' },
+];
+let patAppts = [
+  { id:1, doctor:'Dr. Sarah Johnson', spec:'Cardiology', time:'09:00 AM', date:'Today',    type:'Video Consultation', status:'confirmed' },
+  { id:2, doctor:'Dr. Michael Chen',  spec:'Neurology',  time:'02:30 PM', date:'Tomorrow', type:'In-Person Visit',    status:'pending'   },
+];
+
+const DOCS_LIST = [
+  { id:'D1', name:'Dr. Sarah Johnson', spec:'Cardiology',      exp:'12 yrs', rating:'4.9', patients:186, fee:'$150', hosp:'City General',    tags:['ECG','Heart Failure','Preventive'], em:'👩‍⚕️' },
+  { id:'D2', name:'Dr. Michael Chen',  spec:'Neurology',       exp:'8 yrs',  rating:'4.8', patients:142, fee:'$180', hosp:'Metro Medical',    tags:['Epilepsy','Stroke','Headache'],    em:'👨‍⚕️' },
+  { id:'D3', name:'Dr. Priya Patel',   spec:'Pediatrics',      exp:'10 yrs', rating:'4.9', patients:312, fee:'$120', hosp:"Children's Hosp",  tags:['Vaccines','Growth','Neonatal'],   em:'👩‍⚕️' },
+  { id:'D4', name:'Dr. James Wilson',  spec:'Orthopedics',     exp:'15 yrs', rating:'4.7', patients:98,  fee:'$200', hosp:'Bone & Joint',     tags:['Knee','Spine','Sports'],          em:'👨‍⚕️' },
+  { id:'D5', name:'Dr. Aisha Rahman',  spec:'Dermatology',     exp:'6 yrs',  rating:'4.8', patients:220, fee:'$130', hosp:'Skin Care Center', tags:['Acne','Eczema','Cosmetic'],       em:'👩‍⚕️' },
+  { id:'D6', name:'Dr. Robert Lee',    spec:'General Medicine', exp:'20 yrs', rating:'4.6', patients:450, fee:'$100', hosp:'Community Clinic', tags:['Diabetes','BP','Checkup'],        em:'👨‍⚕️' },
+];
+
+let bookTarget = null; // { id, name, spec }
+const chatHist = { d:[], p:[] };
+const meetSec  = { d:0, p:0 };
+const meetTmr  = { d:null, p:null };
+
+/* =========================================================
+   PAGE SWITCHING
+========================================================= */
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* =========================================================
+   TAB SWITCHING  (login/register)
+========================================================= */
+function switchTab(prefix, tab, btn) {
+  // deactivate all panes for this prefix
+  document.querySelectorAll(`[id^="${prefix}-pane-"]`).forEach(p => p.classList.remove('on'));
+  document.getElementById(`${prefix}-pane-${tab}`).classList.add('on');
+  // update tab buttons — find siblings
+  btn.closest('.tabs').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+/* =========================================================
+   AUTH
+========================================================= */
+function clrErr(...ids){ ids.forEach(id=>{ const e=document.getElementById(id); if(e) e.textContent=''; }); }
+function setErr(id,msg){ const e=document.getElementById(id); if(e) e.textContent=msg; }
+
+function doctorLogin(){
+  const em = document.getElementById('d-em').value.trim();
+  const pw = document.getElementById('d-pw').value;
+  clrErr('d-em-err','d-pw-err');
+  if(!em){ setErr('d-em-err','Email is required'); return; }
+  if(!pw){ setErr('d-pw-err','Password is required'); return; }
+  const u = DOCTORS_DB[em];
+  if(!u || u.pass !== pw){ setErr('d-pw-err','Wrong credentials — try doctor@test.com / password123'); return; }
+  // Set name
+  document.getElementById('d-sb-name').textContent   = u.name;
+  document.getElementById('d-prof-name').textContent  = u.name;
+  // Reset nav
+  dNav('d-dash', document.querySelector('#d-sidebar .nv[data-sec="d-dash"]'));
+  renderDocAppts();
+  renderDocPatients();
+  // Init chat greeting
+  initChat('d');
+  show('pg-doctor-app');
+  toast('Welcome back, ' + u.name + '!','success');
+}
+
+function doctorRegister(){
+  const n=document.getElementById('d-rn').value.trim();
+  const e=document.getElementById('d-re').value.trim();
+  const s=document.getElementById('d-rs').value;
+  const p=document.getElementById('d-rp').value;
+  clrErr('d-rn-err','d-re-err','d-rs-err','d-rp-err');
+  let ok=true;
+  if(!n){ setErr('d-rn-err','Name required'); ok=false; }
+  if(!e||!e.includes('@')){ setErr('d-re-err','Valid email required'); ok=false; }
+  if(!s){ setErr('d-rs-err','Select a specialty'); ok=false; }
+  if(p.length<6){ setErr('d-rp-err','Min 6 characters'); ok=false; }
+  if(!ok) return;
+  DOCTORS_DB[e]={ pass:p, name:n, spec:s };
+  document.getElementById('d-sb-name').textContent  = n;
+  document.getElementById('d-prof-name').textContent = n;
+  dNav('d-dash', document.querySelector('#d-sidebar .nv[data-sec="d-dash"]'));
+  renderDocAppts();
+  renderDocPatients();
+  initChat('d');
+  show('pg-doctor-app');
+  toast('Welcome, ' + n + '!','success');
+}
+
+function patientLogin(){
+  const em = document.getElementById('p-em').value.trim();
+  const pw = document.getElementById('p-pw').value;
+  clrErr('p-em-err','p-pw-err');
+  if(!em){ setErr('p-em-err','Email is required'); return; }
+  if(!pw){ setErr('p-pw-err','Password is required'); return; }
+  const u = PATIENTS_DB[em];
+  if(!u || u.pass !== pw){ setErr('p-pw-err','Wrong credentials — try patient@test.com / password123'); return; }
+  const first = u.name.split(' ')[0];
+  document.getElementById('p-sb-name').textContent   = u.name;
+  document.getElementById('p-prof-name').textContent  = u.name;
+  document.getElementById('p-greet').textContent      = first;
+  pNav('p-dash', document.querySelector('#p-sidebar .nv[data-sec="p-dash"]'));
+  renderPatAppts();
+  renderDocs(DOCS_LIST);
+  initChat('p');
+  show('pg-patient-app');
+  toast('Welcome back, ' + u.name + '!','success');
+}
+
+function patientRegister(){
+  const n=document.getElementById('p-rn').value.trim();
+  const e=document.getElementById('p-re').value.trim();
+  const p=document.getElementById('p-rp').value;
+  clrErr('p-rn-err','p-re-err','p-rp-err');
+  let ok=true;
+  if(!n){ setErr('p-rn-err','Name required'); ok=false; }
+  if(!e||!e.includes('@')){ setErr('p-re-err','Valid email required'); ok=false; }
+  if(p.length<6){ setErr('p-rp-err','Min 6 characters'); ok=false; }
+  if(!ok) return;
+  PATIENTS_DB[e]={ pass:p, name:n };
+  const first = n.split(' ')[0];
+  document.getElementById('p-sb-name').textContent  = n;
+  document.getElementById('p-prof-name').textContent = n;
+  document.getElementById('p-greet').textContent     = first;
+  pNav('p-dash', document.querySelector('#p-sidebar .nv[data-sec="p-dash"]'));
+  renderPatAppts();
+  renderDocs(DOCS_LIST);
+  initChat('p');
+  show('pg-patient-app');
+  toast('Welcome, ' + n + '!','success');
+}
+
+function logout(){
+  // clear fields
+  ['d-em','d-pw','p-em','p-pw'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  show('pg-landing');
+  toast('Logged out','info');
+}
+
+/* =========================================================
+   SECTION NAV
+========================================================= */
+const dTitles = { 'd-dash':'Dashboard','d-appts':'Appointments','d-patients':'My Patients','d-meeting':'Video Consultation','d-chat':'AI Assistant','d-profile':'Profile' };
+const pTitles = { 'p-dash':'Dashboard','p-doctors':'Find Doctors','p-appts':'My Appointments','p-meeting':'Video Consultation','p-chat':'AI Health Assistant','p-profile':'My Profile' };
+
+function dNav(sec, btn){
+  document.querySelectorAll('#pg-doctor-app .sv').forEach(s=>s.classList.remove('on'));
+  const el = document.getElementById(sec);
+  if(el) el.classList.add('on');
+  document.getElementById('d-page-title').textContent = dTitles[sec] || sec;
+  document.querySelectorAll('#d-sidebar .nv').forEach(n=>n.classList.remove('on','d-on'));
+  if(btn){ btn.classList.add('on','d-on'); }
+}
+
+function pNav(sec, btn){
+  document.querySelectorAll('#pg-patient-app .sv').forEach(s=>s.classList.remove('on'));
+  const el = document.getElementById(sec);
+  if(el) el.classList.add('on');
+  document.getElementById('p-page-title').textContent = pTitles[sec] || sec;
+  document.querySelectorAll('#p-sidebar .nv').forEach(n=>n.classList.remove('on','p-on'));
+  if(btn){ btn.classList.add('on','p-on'); }
+}
+
+/* =========================================================
+   APPOINTMENTS RENDER
+========================================================= */
+function sBadge(s){
+  const map={confirmed:'b-green',pending:'b-orange',cancelled:'b-red'};
+  return `<span class="badge ${map[s]||'b-blue'}">${s}</span>`;
+}
+
+function renderDocAppts(){
+  const today = docAppts.filter(a=>a.date==='Today');
+  const todEl = document.getElementById('d-today-list');
+  const allEl = document.getElementById('d-appt-list');
+  todEl.innerHTML = today.length ? today.map(a=>docApptHTML(a)).join('') : emptyHTML('📅','No appointments today','');
+  allEl.innerHTML = docAppts.length ? docAppts.map(a=>docApptHTML(a)).join('') : emptyHTML('📅','No appointments yet','Add one with "+ New Appointment"');
+  document.getElementById('d-badge').textContent = today.length;
+}
+
+function docApptHTML(a){
+  return `<div class="ai" id="da-${a.id}">
+    <div class="ai-time"><div class="ai-hour">${a.time}</div><div class="ai-date">${a.date}</div></div>
+    <div class="ai-bar"></div>
+    <div class="ai-info">
+      <div class="ai-name">${a.patient}</div>
+      <div class="ai-meta">${a.type} · ${sBadge(a.status)}</div>
+      ${a.notes?`<div class="ai-note">📝 ${a.notes}</div>`:''}
+    </div>
+    <div class="ai-acts">
+      <button class="btn btn-sm btn-primary" onclick="dNav('d-meeting',null);beginMeet('d')">📹</button>
+      <button class="btn btn-sm btn-ghost" onclick="delDocAppt(${a.id})">✕</button>
+    </div>
+  </div>`;
+}
+
+function delDocAppt(id){
+  docAppts = docAppts.filter(a=>a.id!==id);
+  renderDocAppts();
+  toast('Appointment removed','info');
+}
+
+function renderPatAppts(){
+  const active = patAppts.filter(a=>a.status!=='cancelled');
+  const dashEl = document.getElementById('p-dash-appts');
+  const allEl  = document.getElementById('p-appt-list');
+  const dashHtml = active.slice(0,2).map(a=>patApptHTML(a)).join('');
+  dashEl.innerHTML = dashHtml || emptyHTML('📅','No upcoming appointments','');
+  allEl.innerHTML  = patAppts.length ? patAppts.map(a=>patApptHTML(a)).join('') : emptyHTML('📅','No appointments yet','Book one from Find Doctors');
+  document.getElementById('p-badge').textContent    = active.length;
+  document.getElementById('p-upcount').textContent  = active.length;
+}
+
+function patApptHTML(a){
+  const joinBtn = a.type==='Video Consultation' && a.status==='confirmed'
+    ? `<button class="btn btn-sm btn-success" onclick="pNav('p-meeting',null);joinRoom('p')">📹 Join</button>` : '';
+  return `<div class="ai" id="pa-${a.id}">
+    <div class="ai-time"><div class="ai-hour">${a.time}</div><div class="ai-date">${a.date}</div></div>
+    <div class="ai-bar"></div>
+    <div class="ai-info">
+      <div class="ai-name">${a.doctor}</div>
+      <div class="ai-meta">${a.spec} · ${a.type} · ${sBadge(a.status)}</div>
+    </div>
+    <div class="ai-acts">
+      ${joinBtn}
+      <button class="btn btn-sm btn-ghost" onclick="cancelPat(${a.id})">Cancel</button>
+    </div>
+  </div>`;
+}
+
+function cancelPat(id){
+  const a = patAppts.find(x=>x.id===id);
+  if(a){ a.status='cancelled'; renderPatAppts(); toast('Appointment cancelled','info'); }
+}
+
+/* =========================================================
+   DOCTOR CARDS
+========================================================= */
+function renderDocs(list){
+  const el = document.getElementById('p-doc-grid');
+  if(!list.length){ el.innerHTML=emptyHTML('🔍','No doctors found','Try a different search'); return; }
+  el.innerHTML = list.map(d=>`
+    <div class="doc-card">
+      <div class="doc-card-top">
+        <div class="doc-ava">${d.em}</div>
+        <div>
+          <div class="doc-name">${d.name}</div>
+          <div class="doc-spec">${d.spec}</div>
+        </div>
+      </div>
+      <div class="doc-meta">
+        <span>⭐ ${d.rating}</span>
+        <span>👥 ${d.patients}</span>
+        <span>🕐 ${d.exp}</span>
+        <span>💰 ${d.fee}/visit</span>
+      </div>
+      <div class="doc-tags">${d.tags.map(t=>`<span class="badge b-blue">${t}</span>`).join('')}</div>
+      <div class="doc-acts">
+        <button class="btn btn-success btn-sm" onclick="openBook('${d.id}','${d.name}','${d.spec}')">📅 Book Now</button>
+        <button class="btn btn-ghost btn-sm"   onclick="qSend('p','Tell me about ${d.spec} treatment')">💬 Ask AI</button>
+      </div>
+    </div>`).join('');
+}
+
+function filterDocs(q){
+  q=q.toLowerCase();
+  renderDocs(DOCS_LIST.filter(d=>d.name.toLowerCase().includes(q)||d.spec.toLowerCase().includes(q)||d.tags.some(t=>t.toLowerCase().includes(q))));
+}
+function filterSpec(s){
+  renderDocs(s ? DOCS_LIST.filter(d=>d.spec===s) : DOCS_LIST);
+}
+
+function renderDocPatients(){
+  const el = document.getElementById('d-pat-grid');
+  const names=['John Doe','Jane Smith','Mike Johnson','Emily Davis','Robert White'];
+  const conds=['Cardiac Patient','Neuro Patient','Post-Surgery','Hypertension','Diabetes'];
+  const lasts=['Today','Yesterday','2 days ago','3 days ago','1 week ago'];
+  el.innerHTML = names.map((n,i)=>`
+    <div class="doc-card">
+      <div class="doc-card-top">
+        <div class="doc-ava" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);">🧑‍💼</div>
+        <div>
+          <div class="doc-name">${n}</div>
+          <div class="doc-spec" style="color:#10b981;">${conds[i]}</div>
+        </div>
+      </div>
+      <div class="doc-meta"><span>📅 Last: ${lasts[i]}</span></div>
+      <div class="doc-acts">
+        <button class="btn btn-primary btn-sm" onclick="dNav('d-meeting',null);beginMeet('d')">📹 Consult</button>
+        <button class="btn btn-ghost btn-sm">📋 Records</button>
+      </div>
+    </div>`).join('');
+}
+
+/* =========================================================
+   APPOINTMENT MODALS
+========================================================= */
+function saveDocAppt(){
+  const pat  = document.getElementById('mo-pat').value.trim();
+  const date = document.getElementById('mo-date').value;
+  clrErr('mo-pat-err','mo-date-err');
+  if(!pat){ setErr('mo-pat-err','Patient name required'); return; }
+  if(!date){ setErr('mo-date-err','Date required'); return; }
+  docAppts.push({
+    id: Date.now(),
+    patient: pat,
+    time: document.getElementById('mo-time').value,
+    date: fmtDate(date),
+    type: document.getElementById('mo-type').value,
+    status:'confirmed',
+    notes: document.getElementById('mo-notes').value
+  });
+  renderDocAppts();
+  closeModal('mo-appt');
+  document.getElementById('mo-pat').value='';
+  document.getElementById('mo-notes').value='';
+  toast('Appointment booked for '+pat,'success');
+}
+
+function openBook(id,name,spec){
+  bookTarget={id,name,spec};
+  document.getElementById('mo-book-title').textContent='Book with '+name;
+  document.getElementById('mb-date').value=new Date().toISOString().split('T')[0];
+  openModal('mo-book');
+}
+
+function confirmBook(){
+  if(!bookTarget) return;
+  const date = document.getElementById('mb-date').value;
+  if(!date){ setErr('mb-date-err','Date required'); return; }
+  patAppts.push({
+    id: Date.now(),
+    doctor: bookTarget.name,
+    spec: bookTarget.spec,
+    time: document.getElementById('mb-time').value,
+    date: fmtDate(date),
+    type: document.getElementById('mb-type').value,
+    status:'confirmed'
+  });
+  renderPatAppts();
+  closeModal('mo-book');
+  document.getElementById('mb-reason').value='';
+  pNav('p-appts', document.querySelector('#p-sidebar .nv[data-sec="p-appts"]'));
+  toast('Appointment booked with '+bookTarget.name+'! ✅','success');
+}
+
+function fmtDate(s){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const d=new Date(s); d.setHours(0,0,0,0);
+  const diff=(d-today)/86400000;
+  if(diff===0) return 'Today';
+  if(diff===1) return 'Tomorrow';
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+/* =========================================================
+   VIDEO MEETING
+========================================================= */
+function beginMeet(px){
+  document.getElementById(`${px}-live`).style.display='flex';
+  document.getElementById(`${px}-timer`).style.display='inline';
+  const grid = document.getElementById(`${px}-vgrid`);
+  grid.innerHTML=`
+    <div class="vid-tile" style="min-height:120px;">
+      <div class="vid-av">${px==='d'?'👨‍⚕️':'🧑‍💼'}</div>
+      <span class="vid-lbl">You</span>
+    </div>
+    <div class="vid-tile" style="min-height:120px;">
+      <div class="vid-av">${px==='d'?'🧑‍💼':'👩‍⚕️'}</div>
+      <span class="vid-lbl">${px==='d'?'Patient':'Dr. Sarah Johnson'}</span>
+    </div>`;
+  if(meetTmr[px]) clearInterval(meetTmr[px]);
+  meetSec[px]=0;
+  meetTmr[px]=setInterval(()=>{
+    meetSec[px]++;
+    const m=String(Math.floor(meetSec[px]/60)).padStart(2,'0');
+    const s=String(meetSec[px]%60).padStart(2,'0');
+    document.getElementById(`${px}-timer`).textContent=m+':'+s;
+  },1000);
+  toast('Consultation started ✅','success');
+}
+
+function joinRoom(px){
+  const code=(document.getElementById(`${px}-room-in`)||{}).value||'ROOM-DR-001';
+  if(!code.trim()){ toast('Enter a room code','error'); return; }
+  const lbl = document.getElementById('p-room-lbl');
+  if(lbl) lbl.textContent=code.trim();
+  beginMeet(px);
+  toast('Joined room: '+code.trim(),'success');
+}
+
+function endMeet(px){
+  if(meetTmr[px]){ clearInterval(meetTmr[px]); meetTmr[px]=null; }
+  document.getElementById(`${px}-live`).style.display='none';
+  const tmrEl=document.getElementById(`${px}-timer`);
+  const dur=tmrEl.textContent;
+  tmrEl.style.display='none'; tmrEl.textContent='00:00';
+  const grid=document.getElementById(`${px}-vgrid`);
+  grid.innerHTML=`<div class="vid-tile full">
+    <div class="vid-av" id="${px}-main-av">${px==='d'?'👨‍⚕️':'🧑‍💼'}</div>
+    <span class="vid-lbl" id="${px}-main-lbl">${px==='d'?'Click "Start Consultation" to begin':'Enter room code and click Join'}</span>
+  </div>`;
+  meetSec[px]=0;
+  toast(`Consultation ended · Duration: ${dur}`,'info');
+}
+
+let mutedState={d:false,p:false};
+let camOff={d:false,p:false};
+
+function toggleMute(px){
+  mutedState[px]=!mutedState[px];
+  const btn=document.getElementById(`${px}-mute`);
+  btn.textContent=mutedState[px]?'🔇':'🎙️';
+  btn.className='ctrl '+(mutedState[px]?'muted':'grey');
+  toast(mutedState[px]?'Muted':'Unmuted','info');
+}
+function toggleCam(px){
+  camOff[px]=!camOff[px];
+  const btn=document.getElementById(`${px}-cam`);
+  btn.textContent=camOff[px]?'📵':'📷';
+  btn.className='ctrl '+(camOff[px]?'red':'grey');
+  toast(camOff[px]?'Camera off':'Camera on','info');
+}
+
+/* =========================================================
+   CHATBOT
+========================================================= */
+const SYS_D = `You are MediBot, a professional AI clinical assistant for doctors on MediCare Pro. Help with medical references, drug interactions, clinical guidance, and practice management. Be concise (2-4 sentences), professional, and always recommend clinical judgment for specific patient decisions.`;
+const SYS_P = `You are MediBot, a friendly AI health assistant for patients on MediCare Pro. Help users understand symptoms, find the right specialist, explain medical terms simply, and guide appointment booking. Be warm, empathetic, concise (2-4 sentences), and always recommend seeing a real doctor for medical decisions.`;
+
+function initChat(px){
+  const box = document.getElementById(`${px}-msgs`);
+  box.innerHTML='';
+  const greeting = px==='d'
+    ? "Hello Doctor! 👋 I'm MediBot, your AI clinical assistant. I can help with medical references, drug interactions, patient summaries, and more. How can I help you today?"
+    : "Hi there! 👋 I'm MediBot, your personal health assistant. I can help you understand symptoms, find the right doctor, or answer health questions. How can I help?";
+  addMsg(px,'bot',greeting);
+  document.getElementById(`${px}-qr`).style.display='flex';
+}
+
+async function chat(px){
+  const inp = document.getElementById(`${px}-cin`);
+  const msg = inp.value.trim();
+  if(!msg) return;
+  inp.value='';
+  addMsg(px,'user',msg);
+  document.getElementById(`${px}-qr`).style.display='none';
+  chatHist[px].push({role:'user',content:msg});
+  const tid='t'+Date.now();
+  addTyping(px,tid);
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system: px==='d'?SYS_D:SYS_P,
+        messages: chatHist[px]
+      })
+    });
+    const data = await res.json();
+    rmTyping(tid);
+    const reply = data.content?.[0]?.text || (data.error?`Error: ${data.error.message}`:'Sorry, something went wrong.');
+    chatHist[px].push({role:'assistant',content:reply});
+    addMsg(px,'bot',reply);
+  } catch(e){
+    rmTyping(tid);
+    const err='Connection issue. Please try again.';
+    addMsg(px,'bot',err);
+  }
+}
+
+function qSend(px,msg){
+  document.getElementById(`${px}-cin`).value=msg;
+  chat(px);
+}
+
+function addMsg(px,role,text){
+  const box=document.getElementById(`${px}-msgs`);
+  const now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const d=document.createElement('div');
+  d.className=`msg ${role}`;
+  d.innerHTML=`
+    <div class="msg-ava ${role}">${role==='user'?'🧑':'🤖'}</div>
+    <div>
+      <div class="bubble ${role}">${esc(text)}</div>
+      <div class="msg-time">${now}</div>
+    </div>`;
+  box.appendChild(d);
+  box.scrollTop=box.scrollHeight;
+}
+
+function addTyping(px,id){
+  const box=document.getElementById(`${px}-msgs`);
+  const d=document.createElement('div');
+  d.className='msg bot'; d.id=id;
+  d.innerHTML=`<div class="msg-ava bot">🤖</div><div class="typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>`;
+  box.appendChild(d);
+  box.scrollTop=box.scrollHeight;
+}
+function rmTyping(id){ const e=document.getElementById(id); if(e) e.remove(); }
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+
+/* =========================================================
+   MODALS
+========================================================= */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); });
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open')); });
+
+/* =========================================================
+   TOAST
+========================================================= */
+let _tt;
+function toast(msg,type='info'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=type+' show';
+  clearTimeout(_tt); _tt=setTimeout(()=>t.className=type,3200);
+}
+
+/* =========================================================
+   HELPERS
+========================================================= */
+function emptyHTML(ico,title,sub){
+  return `<div class="empty"><div class="empty-ico">${ico}</div><div class="empty-title">${title}</div>${sub?`<div class="empty-sub">${sub}</div>`:''}</div>`;
+}
+
+/* =========================================================
+   INIT
+========================================================= */
+window.addEventListener('DOMContentLoaded',()=>{
+  // set today min on date inputs
+  const td=new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type=date]').forEach(el=>{ if(!el.value) el.min=td; });
+});
+</script>
+</body>
+</html>
